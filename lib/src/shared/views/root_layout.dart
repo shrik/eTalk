@@ -30,8 +30,6 @@ class RootLayout extends StatelessWidget {
           final destination = router.destinations[index];
           go.GoRouter.of(context).go(destination.route);
         }
-
-        final current = state.songWithProgress;
         return AdaptiveNavigation(
           key: _navigationRailKey,
           destinations: router.destinations

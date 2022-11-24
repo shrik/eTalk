@@ -12,10 +12,9 @@ class HomeHighlight extends StatelessWidget {
       children: [
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 5), // Modify this line
-            child: Clickable(
-              child: SizedBox(
-                height: 275,
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5), // Modify this line
+            child:  SizedBox(
+                height: 120,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.asset(
@@ -24,8 +23,6 @@ class HomeHighlight extends StatelessWidget {
                   ),
                 ),
               ),
-              onTap: () => launchUrl(Uri.parse('https://docs.flutter.dev')),
-            ),
           ),
         ),
       ],

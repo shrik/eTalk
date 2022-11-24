@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myartist/src/features/courses/course_detail.dart';
+import 'package:myartist/src/features/my/my_home.dart';
 
 import '../features/artists/artists.dart';
 import '../features/talks/talks.dart';
@@ -18,24 +20,24 @@ final playlistsProvider = PlaylistsProvider();
 
 const List<NavigationDestination> destinations = [
   NavigationDestination(
-    label: 'Home',
+    label: '首页',
     icon: Icon(Icons.home), // Modify this line
     route: '/',
   ),
   NavigationDestination(
-    label: 'Playlists',
+    label: '资源',
     icon: Icon(Icons.playlist_add_check), // Modify this line
     route: '/playlists',
   ),
   NavigationDestination(
-    label: 'Artists',
+    label: '收藏',
     icon: Icon(Icons.people), // Modify this line
     route: '/artists',
   ),
   NavigationDestination(
-    label: 'Talk',
+    label: '我的',
     icon: Icon(Icons.chat_bubble_outline), // Modify this line
-    route: '/talks',
+    route: '/my',
   ),
 ];
 
@@ -126,35 +128,39 @@ final appRouter = GoRouter(
         ),
       ],
     ),
-    GoRoute(
-        path: '/talks',
-        pageBuilder: (context, state) => const MaterialPage<void>(
-              key: _pageKey,
-              child: RootLayout(
-                key: _scaffoldKey,
-                currentIndex: 3,
-                child: TalkScreen(),
-              ),
-            ),
-        routes: [
-          GoRoute(
-            path: 'buyingtextbook',
-            pageBuilder: (context, state) => MaterialPage<void>(
-              key: state.pageKey,
-              child:  const ConversationScreen()),
-          ),
-        ]),
-    for (final route in destinations.skip(3))
-      GoRoute(
-        path: route.route,
-        pageBuilder: (context, state) => MaterialPage<void>(
-          key: _pageKey,
-          child: RootLayout(
-            key: _scaffoldKey,
-            currentIndex: destinations.indexOf(route),
-            child: const SizedBox(),
-          ),
+    GoRoute(path: "/my",
+      pageBuilder: (context, state) => const MaterialPage<void>(
+        key: _pageKey,
+        child: RootLayout(
+          key: _scaffoldKey,
+          currentIndex: 3,
+          child: MyHome(),
         ),
       ),
+    ),
+    GoRoute(
+        path: '/talks/buyingtextbook',
+        pageBuilder: (context, state) => MaterialPage<void>(
+            key: state.pageKey, child: const CourseDetail()),
+        routes: [
+          GoRoute(
+              path: '01',
+              pageBuilder: (context, state) =>
+                  MaterialPage<void>(child: const ConversationScreen())),
+        ],
+        ),
+
+    // for (final route in destinations.skip(3))
+    //   GoRoute(
+    //     path: route.route,
+    //     pageBuilder: (context, state) => MaterialPage<void>(
+    //       key: _pageKey,
+    //       child: RootLayout(
+    //         key: _scaffoldKey,
+    //         currentIndex: destinations.indexOf(route),
+    //         child: const SizedBox(),
+    //       ),
+    //     ),
+    //   ),
   ],
 );

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter_sound/public/flutter_sound_recorder.dart';
@@ -7,7 +6,6 @@ import 'package:myartist/src/features/talks/running_step.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart'
     show getApplicationDocumentsDirectory, getTemporaryDirectory;
-import 'package:http/http.dart' as http;
 
 import '../../audio/audio_client.dart';
 import '../../lib/listener_interface.dart';
@@ -16,6 +14,12 @@ import 'package:logger/logger.dart' as logger;
 import 'package:synchronized/synchronized.dart';
 import 'package:just_audio/just_audio.dart';
 
+enum ConversationStatus{
+  NotStarted,
+  Running,
+  Paused,
+  Finished
+}
 
 class ConversationController {
   ConversationInfo conversationInfo = ConversationInfo();
@@ -31,17 +35,23 @@ class ConversationController {
   bool sectionResume = false;
   int tSampleRate = 16000;
   Lock lock = Lock();
-  bool paused = false;
-  bool finished = false;
-  bool started = false;
-  bool running = false;
-  bool get isFinished => finished;
-  bool get isPaused => paused;
-  bool get isStarted => started;
+  ConversationStatus cStatus = ConversationStatus.NotStarted;
+  bool get isFinished => getStatus() == ConversationStatus.Finished;
+  bool get isPaused => getStatus() == ConversationStatus.Paused;
+  bool get isStarted => getStatus() != ConversationStatus.NotStarted;
   RunningStep? currentStep;
   List<String> get Speakers => conversationInfo.Speakers;
 
   ConversationController();
+
+
+  ConversationStatus getStatus(){
+    return ConversationStatus.NotStarted;
+  }
+
+  bool isRecording(){
+    return [ListenSpeakerStep, CheckInputStep].contains(currentStep.runtimeType);
+  }
 
   void setUserRole(String name){
     robotRoles = [];
@@ -65,14 +75,13 @@ class ConversationController {
   }
 
 
-  void reset(){
-    lock.synchronized(() {
-      paused = false;
-      finished = false;
-      started = false;
-      running = false;
+  Future<void> reset() async {
+    await lock.synchronized(() async {
+      setCurrentStatus(ConversationStatus.NotStarted);
       sectionResume = false;
       currentStep = null;
+      await sectionRecorder.closeRecorder();
+      await myRecorder.closeRecorder();
       conversationInfo.reset();
     });
   }
@@ -125,8 +134,7 @@ class ConversationController {
       await lock.synchronized(() async {
         File file = await AudioClient.getFileFromAssets("audios/BuyingTextBooks.mp3");
         await myPlayer.setFilePath(file.path);
-        // print("**************=> \n" + conversationInfo.sentences.toString());
-        started = true;
+        setCurrentStatus(ConversationStatus.Running);
       });
       unawaited(run());
     } catch (e) {
@@ -139,19 +147,19 @@ class ConversationController {
 
   Future<void> pause() async {
     await lock.synchronized(() async {
-      if(paused || running == false || currentStep == null){
+      if(getStatus() != ConversationStatus.Running || currentStep == null){
         throw Exception("not running");
       }else{
-        paused = true;
-          await currentStep?.stop();
+        setCurrentStatus(ConversationStatus.Paused);
+        await currentStep?.stop();
       }
     });
   }
 
   Future<void> resume() async {
     await lock.synchronized(() async {
-      if(paused && running == false){
-        paused = false;
+      if(getStatus() == ConversationStatus.Paused){
+        setCurrentStatus(ConversationStatus.Running);
         unawaited(run());
       }else{
         throw Exception("error resuming");
@@ -159,11 +167,15 @@ class ConversationController {
     });
   }
 
+  void setCurrentStatus(ConversationStatus st){
+    cStatus = st;
+    broadcast();
+  }
+
 
   Future<void> run() async {
-    await lock.synchronized(() => running = true);
-    bool hasError = false;
-    while (!isFinished && !hasError && !isPaused) {
+    await lock.synchronized(() => setCurrentStatus(ConversationStatus.Running));
+    while (!isFinished  && !isPaused) {
       await lock.synchronized(()  async {
         if(isPaused){return;}
         currentStep ??= await keepGoing(null);
@@ -174,8 +186,11 @@ class ConversationController {
         if(currentStep!.isFinnished){
           currentStep = await keepGoing(currentStep!);
           if(currentStep == null){
-            finished = true;
+            setCurrentStatus(ConversationStatus.Finished);
             unawaited(broadcast());
+            var player = await AudioPlayer();
+            player.setAsset("assets/audios/mixkit-fairy-arcade-sparkle-866.wav");
+            player.dispose();
             return;
           }
           f = currentStep!.run();
@@ -193,7 +208,6 @@ class ConversationController {
         });
       }
     }
-    await lock.synchronized(() => running=false);
   }
 
   Future<RunningStep?> keepGoing(RunningStep? lastStep) async {

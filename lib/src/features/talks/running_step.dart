@@ -110,11 +110,16 @@ class ListenSpeakerStep extends RunningStep {
   StreamSubscription<Food>? recorderDataSubscription;
   BytesBuilder bytesBuilder = BytesBuilder();
   int tSampleRate;
+  AudioPlayer soundEffectPlayer = AudioPlayer();
+
 
   ListenSpeakerStep(this.recorder, this.sentenceInfo, this.tSampleRate);
 
   @override
   Future<BytesBuilder> run() async {
+    await soundEffectPlayer.setAsset("assets/audios/mixkit-small-door-bell-589.wav");
+    soundEffectPlayer.setClip(start: Duration(milliseconds: 100), end: Duration(milliseconds: 500));
+    await soundEffectPlayer.play();
     await recorder.openRecorder();
     recordingDataController = StreamController<Food>();
     recorderDataSubscription =
@@ -149,6 +154,7 @@ class ListenSpeakerStep extends RunningStep {
   Future<void> deposit() async {
     await recorderDataSubscription!.cancel();
     await recorder.closeRecorder();
+    await soundEffectPlayer.dispose();
   }
 }
 
