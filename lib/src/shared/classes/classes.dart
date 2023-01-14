@@ -5,3 +5,5 @@ export './news.dart';
 export './playlist.dart';
 export './ranked_song.dart';
 export './song.dart';
+export './lesson.dart';
+export './conversation.dart';

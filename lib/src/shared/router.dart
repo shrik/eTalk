@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myartist/src/features/courses/course_detail.dart';
 import 'package:myartist/src/features/my/my_home.dart';
+import 'package:myartist/src/shared/providers/conversations.dart';
+import 'package:myartist/src/shared/providers/lessons.dart';
 
 import '../features/artists/artists.dart';
 import '../features/talks/talks.dart';
 import '../features/home/home.dart';
 import '../features/playlists/playlists.dart';
 import '../features/playlists/view/view.dart';
+import 'classes/classes.dart';
 import 'providers/artists.dart';
 import 'providers/playlists.dart';
 import 'views/views.dart';
@@ -128,7 +131,8 @@ final appRouter = GoRouter(
         ),
       ],
     ),
-    GoRoute(path: "/my",
+    GoRoute(
+      path: "/my",
       pageBuilder: (context, state) => const MaterialPage<void>(
         key: _pageKey,
         child: RootLayout(
@@ -138,17 +142,60 @@ final appRouter = GoRouter(
         ),
       ),
     ),
+    GoRoute(path: "/conversations",
+      pageBuilder: (context, state) => MaterialPage<void>(
+        child: Text("")
+      ),
+      routes:[
+        GoRoute(
+            path: ':conversation_id',
+            pageBuilder: (context, state) =>
+                MaterialPage<void>(child: FutureBuilder(
+                    future: ConversationProvider.getConversation(state.params["conversation_id"]!),
+                    builder: (context, AsyncSnapshot<Conversation> snapshot){
+                      if (snapshot.hasData) {
+                        return ConversationScreen(conversation: snapshot.data!);
+                      } else if (snapshot.hasError) {
+                        print(snapshot.stackTrace!);
+                        throw snapshot.error!;
+                      } else {
+                        return Text("Loading");
+                      }
+                    }
+                ))),
+      ]
+    ),
     GoRoute(
-        path: '/talks/buyingtextbook',
-        pageBuilder: (context, state) => MaterialPage<void>(
-            key: state.pageKey, child: const CourseDetail()),
-        routes: [
-          GoRoute(
-              path: '01',
-              pageBuilder: (context, state) =>
-                  MaterialPage<void>(child: const ConversationScreen())),
-        ],
+      path: '/talks',
+      pageBuilder: (context, state) => MaterialPage<void>(
+        child: Text("")
+      ),
+      routes: [
+        GoRoute(path: ":lesson_id",
+            pageBuilder: (context, state) => MaterialPage<void>(
+                key: state.pageKey,
+                child: FutureBuilder(
+                  future: LessonProvider.getLesson(state.params["lesson_id"]!),
+                  builder: (context, AsyncSnapshot<Lesson> snapshot) {
+                    if (snapshot.hasData) {
+                      return CourseDetail(lesson: snapshot.data!);
+                    } else if (snapshot.hasError) {
+                      print(snapshot.stackTrace!);
+                      throw snapshot.error!;
+                    } else {
+                      return Text("Loading");
+                    }
+                  },
+                )
+            ),
+          routes:[
+
+          ]
         ),
+
+                // MaterialPage<void>(child: const ConversationScreen())),
+      ],
+    ),
 
     // for (final route in destinations.skip(3))
     //   GoRoute(

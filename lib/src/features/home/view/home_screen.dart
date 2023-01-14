@@ -1,5 +1,5 @@
-import 'package:adaptive_components/adaptive_components.dart';
 import 'package:flutter/material.dart';
+import 'package:myartist/src/shared/providers/lessons.dart';
 
 import '../../../shared/classes/classes.dart';
 import '../../../shared/extensions.dart';
@@ -16,14 +16,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  Future<List<Lesson>>? lessons;
+
+  @override
+  void initState() {
+    super.initState();
+    lessons = LessonProvider.getEasyLearningLessons();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final PlaylistsProvider playlistProvider = PlaylistsProvider();
-    final List<Playlist> playlists = playlistProvider.playlists;
-    final Playlist topSongs = playlistProvider.topSongs;
-    final Playlist newReleases = playlistProvider.newReleases;
-    final ArtistsProvider artistsProvider = ArtistsProvider();
-    final List<Artist> artists = artistsProvider.artists;
     return LayoutBuilder(
       builder: (context, constraints) {
         // Add conditional mobile layout
@@ -47,9 +49,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         children: [
                           const HomeHighlight(),
-                          HomeContent(
-                            artists: artists,
-                            constraints: constraints,
+                          FutureBuilder(
+                            future: lessons,
+                            builder: (context, AsyncSnapshot<List<Lesson>> snapshot) {
+                              if(snapshot.hasData){
+                                return HomeContent(lessons: snapshot.data!,
+                                    constraints: constraints);
+                              }else if(snapshot.hasError){
+                                print(snapshot.stackTrace!);
+                                throw snapshot.error!;
+                              } else{
+                                return Text("Loading");
+                              }
+                            },
                           ),
                         ],
                       ),

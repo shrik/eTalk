@@ -103,16 +103,9 @@ class AudioClient {
   //   return ret.contains("true");
   // }
 
-  static Future<void> playMusic(double from, double to, FlutterSoundPlayer? myPlayer) async{
-    if(myPlayer == null){
-      FlutterSoundPlayer myPlayer = FlutterSoundPlayer();
-      await myPlayer.openPlayer();
-      File file = await AudioClient.getFileFromAssets("audios/BuyingTextBooks.mp3");
-      await myPlayer.startPlayer(fromURI: file.path);
-      await myPlayer.pausePlayer();
-    }
+  static Future<void> playMusic(double from, double to, FlutterSoundPlayer myPlayer) async{
     Duration duration = Duration(milliseconds: (from * 1000).round());
-    await myPlayer?.seekToPlayer(duration);
-    await myPlayer?.resumePlayer();
+    await myPlayer.seekToPlayer(duration);
+    await myPlayer.resumePlayer();
   }
 }

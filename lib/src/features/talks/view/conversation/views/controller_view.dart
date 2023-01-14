@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:myartist/src/features/talks/conversation_controller.dart';
 import 'package:myartist/src/features/talks/talks.dart';
 
+import '../../../lib/caption.dart';
+
 class MainCtlButton extends StatelessWidget{
   final ConversationStatus cStatus;
   const MainCtlButton({required this.cStatus, super.key});
@@ -9,6 +11,7 @@ class MainCtlButton extends StatelessWidget{
   Widget build(BuildContext context) {
     ConversationController cvstCtrl = ConversationInheried.of(context).conversationControler;
     final double mainCtlBtnSize = 50;
+    print("current status is ${cStatus.toString()}");
     if (cStatus == ConversationStatus.Finished) {
       return IconButton(
           icon: Icon(Icons.replay, size: mainCtlBtnSize),
@@ -31,6 +34,7 @@ class MainCtlButton extends StatelessWidget{
             color: Colors.black,
           ),
           onPressed: () async {
+            print("cvstCtrl is started ${cvstCtrl.isStarted}");
             if (cvstCtrl.isStarted) {
               await cvstCtrl.resume();
             } else {
@@ -93,14 +97,7 @@ class UserRoleCtlButton extends StatelessWidget{
 
 class CaptionCtrlButton extends StatelessWidget{
 
-  static const Map<int, String> captionOptions = {
-    0: "显示原文",
-    1: "50%提示",
-    2: "25%提示",
-    3: "中文提示",
-    4: "隐藏原文"
-  };
-  final int captionOptionVal;
+  final CaptionEnum captionOptionVal;
   const CaptionCtrlButton({required this.captionOptionVal, super.key});
 
   @override
@@ -121,7 +118,7 @@ class CaptionCtrlButton extends StatelessWidget{
             borderRadius: BorderRadius.circular(5)),
       ),
       onTap: () async {
-        int? captionOptionSelected = await showDialog(
+        CaptionEnum? captionOptionSelected = await showDialog(
             context: context,
             builder: (context) {
               return SimpleDialog(
@@ -145,7 +142,8 @@ class CaptionCtrlButton extends StatelessWidget{
 
 class StatusDisplayWidget extends StatelessWidget{
   final ConversationStatus cStatus;
-  const StatusDisplayWidget({required this.cStatus, super.key});
+  final int activeIndex;
+  const StatusDisplayWidget({required this.cStatus, required this.activeIndex, super.key});
   @override
   Widget build(BuildContext context) {
     ConversationController cvstCtrl = ConversationInheried.of(context).conversationControler;
@@ -267,7 +265,7 @@ class _ContorllerViewState extends State<ContorllerView> {
                 );
               }),
           ValueListenableBuilder(valueListenable: ConversationInheried.of(context).captionValueNotifier,
-              builder: (context,int captionOptionVal, child){
+              builder: (context,CaptionEnum captionOptionVal, child){
                 return CaptionCtrlButton(captionOptionVal: captionOptionVal);
               }),
           ValueListenableBuilder(
@@ -278,11 +276,22 @@ class _ContorllerViewState extends State<ContorllerView> {
           ),
           IconButton(
             icon: const Icon(Icons.skip_next_outlined),
-            onPressed: () {},
+            onPressed: () async {
+              if(cvstCtrl.cStatus != ConversationStatus.Running){
+                //pass
+              }else{
+                await cvstCtrl.skipCurrent();
+              }
+            },
           ),
           ValueListenableBuilder(valueListenable: ConversationInheried.of(context).currentStateNotifier,
               builder: (context, ConversationStatus st, child){
-                return StatusDisplayWidget(cStatus: st);
+                return ValueListenableBuilder(
+                  valueListenable: ConversationInheried.of(context).activeIndexNotifier,
+                  builder: (context, int activeIndex, child){
+                    return StatusDisplayWidget(cStatus: st, activeIndex: activeIndex);
+                  },
+                );
               })
         ],
       ),

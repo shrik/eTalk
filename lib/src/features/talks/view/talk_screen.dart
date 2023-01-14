@@ -15,7 +15,7 @@ class TalkScreen extends StatelessWidget {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              BuyTextbookButton(),
+              // BuyTextbookButton(),
               Text("----"),
               // ListenButton(),
               // Text("----"),

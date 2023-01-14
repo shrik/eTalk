@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/classes/classes.dart';
 import '../../../conversation_info.dart';
 import 'active_section.dart';
 import 'inactive_section.dart';
@@ -8,7 +9,7 @@ import 'inactive_section.dart';
 
 
 class SentenceSection extends StatefulWidget {
-  final SentenceInfo sentenceInfo;
+  final Sentence sentenceInfo;
   final int index;
   final ValueListenable<int> activeIndexNotifier;
   const SentenceSection({required this.sentenceInfo,

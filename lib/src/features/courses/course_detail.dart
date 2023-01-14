@@ -1,37 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myartist/src/shared/extensions.dart';
+import '../../shared/classes/classes.dart';
 
 class CourseDetail extends StatelessWidget {
-  const CourseDetail({super.key});
+  final Lesson lesson;
+  const CourseDetail({super.key, required this.lesson});
   @override
   Widget build(BuildContext context) {
-    var courseRow = GestureDetector(
-      onTap: () {GoRouter.of(context).push("/talks/buyingtextbook/01");},
-      child: Row(
-        children: [
-          SizedBox(
-            width: 50,
-            height: 50,
-            child: CircleAvatar(backgroundImage: AssetImage("assets/images/albums/artist1-album2.jpg"),),
-          ),
-          SizedBox(width: 20),
-          Expanded(child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("First Lesson"),
-              Text("Some descriptions here")
-            ],
-          )),
-          Icon(Icons.navigate_next)
-        ],
-      )
-    ) ;
+    final List<Conversation> conversations = lesson.conversations;
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
           primary: false,
           appBar: AppBar(
-            title: const Text('TODO'),
+            title: const Text('课程详情'),
             toolbarHeight: kToolbarHeight * 2,
           ),
           body: SingleChildScrollView(
@@ -40,32 +21,49 @@ class CourseDetail extends StatelessWidget {
               children: [
                   Row(
                     children: [
-                      Image.asset("assets/images/albums/artist1-album2.jpg", width: 100),
+                      Image.network(lesson.coverUrl(), width: 100),
                       SizedBox(width: 20,),
                       Expanded(child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Buying Text Book", style: TextStyle(fontSize: 20),),
+                          Text(lesson.name, style: TextStyle(fontSize: 20),),
                           SizedBox(height: 10,),
-                          Text("包含两接课程： 1.包含两接课程含两接课程含两接课程含两接课程含两接课程含两接课程含两接课程",
+                          Text(lesson.description,
                               maxLines: 3, softWrap:true,
                             style: TextStyle(fontSize: 16, color: Colors.grey)),
                           SizedBox(height: 10,),
-                          Text("中级  50234人正在学习", style: TextStyle(fontSize: 14, color: Colors.grey))
+                          // Text("中级  50234人正在学习", style: TextStyle(fontSize: 14, color: Colors.grey))
+                          Text("中级", style: TextStyle(fontSize: 14, color: Colors.grey))
                         ],
                       ))
                     ],
                   ),
                 SizedBox(height: 40,),
                 Align(child: Text("课程列表"), alignment: Alignment.centerLeft,),
-                SizedBox(height: 20,),
-                courseRow,
-                SizedBox(height: 20,),
-                courseRow,
-                SizedBox(height: 20,),
-                courseRow,
-                SizedBox(height: 20,),
-                courseRow,
+                Column(children: conversations.map((e) => Column(children: [
+                        SizedBox(height: 20,),
+                        InkWell(
+                            onTap: () {GoRouter.of(context).push("/conversations/" + e.id.toString());},
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 50,
+                                  height: 50,
+                                  child: CircleAvatar(backgroundImage: AssetImage("assets/images/albums/artist1-album2.jpg"),),
+                                ),
+                                SizedBox(width: 20),
+                                Expanded(child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(e.title),
+                                    Text(e.description)
+                                  ],
+                                )),
+                                Icon(Icons.navigate_next)
+                              ],
+                            )
+                        )
+                        ],)).toList(),),
               ],
             ),
           ),

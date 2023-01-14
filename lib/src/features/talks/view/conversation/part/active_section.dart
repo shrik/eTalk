@@ -3,12 +3,11 @@ import 'package:myartist/src/features/talks/view/conversation/part/caption_displ
 import 'package:myartist/src/features/talks/view/conversation/part/person_icon_widget.dart';
 import 'package:myartist/src/features/talks/view/conversation/part/prompt_widget.dart';
 import 'package:myartist/src/features/talks/view/conversation/part/section_toolbox.dart';
-
-import '../../../conversation_info.dart';
+import '../../../../../shared/classes/classes.dart';
 import '../../../talks.dart';
 
 class ActiveSection extends StatelessWidget{
-  final SentenceInfo sentenceInfo;
+  final Sentence sentenceInfo;
   final int index;
   static final nameStyle = TextStyle(fontSize: 12, color: Colors.black);
 
@@ -34,7 +33,13 @@ class ActiveSection extends StatelessWidget{
                         padding: EdgeInsets.fromLTRB(15, 0, 0, 0),
                         child: Column(
                           children: [
-                            CaptionDisplayWidget(sentenceInfo: sentenceInfo, forcedDisplay: false),
+                            CaptionDisplayWidget(sentenceInfo: sentenceInfo,
+                              captionOptionNotifier: ConversationInheried.of(context).captionValueNotifier,
+                              userRoleNotifier: ConversationInheried.of(context).userRoleNotifier,
+                              activeIndexNotifier: ConversationInheried.of(context).activeIndexNotifier,
+                              conversationStatusNotifier: ConversationInheried.of(context).currentStateNotifier,
+                              index: index
+                            ),
                             SizedBox(
                               height: 10,
                             ),

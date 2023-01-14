@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:myartist/src/features/talks/lib/caption.dart';
 import 'package:myartist/src/features/talks/view/conversation/part/sentence_section.dart';
 import 'package:myartist/src/features/talks/view/conversation/views/controller_view.dart';
 import '../../../../lib/listener_interface.dart';
+import '../../../../shared/classes/classes.dart';
 import '../../conversation_controller.dart';
 import '../../conversation_info.dart';
 import 'views/content_view.dart';
@@ -9,7 +11,7 @@ import 'views/content_view.dart';
 
 class ConversationInheried extends InheritedWidget{
   final ConversationController conversationControler;
-  final ValueNotifier<int> captionValueNotifier;
+  final ValueNotifier<CaptionEnum> captionValueNotifier;
   final ValueNotifier<String> userRoleNotifier;
   final ValueNotifier<ConversationStatus> currentStateNotifier;
   final ValueNotifier<int> activeIndexNotifier;
@@ -37,7 +39,7 @@ class ContentView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ConversationController cvstCtrl = ConversationInheried.of(context).conversationControler;
-    List<SentenceInfo> sentences = cvstCtrl.conversationInfo.sentences;
+    List<Sentence> sentences = cvstCtrl.conversationInfo.sentences;
     return Column(
       children: sentences.asMap().entries.map((e) {
         return SentenceSection(sentenceInfo: e.value, index: e.key ,
@@ -49,7 +51,8 @@ class ContentView extends StatelessWidget {
 }
 
 class ConversationScreen extends StatefulWidget {
-  const ConversationScreen({Key? key}) : super(key: key);
+  final Conversation conversation;
+  const ConversationScreen({Key? key, required this.conversation}) : super(key: key);
 
   @override
   State<ConversationScreen> createState() => _ConversationScreenState();
@@ -57,28 +60,20 @@ class ConversationScreen extends StatefulWidget {
 
 class _ConversationScreenState extends State<ConversationScreen>
     with ListenerInterface {
-  ConversationController cvstCtrl = ConversationController();
+  late ConversationController cvstCtrl ;
   ValueNotifier<String> userRole = ValueNotifier("Tom");
-  ValueNotifier<int> captionOptionValue = ValueNotifier(0);
+  ValueNotifier<CaptionEnum> captionOptionValue = ValueNotifier(CaptionEnum.OriginalText);
   ValueNotifier<ConversationStatus> currentStateNotifier = ValueNotifier(ConversationStatus.NotStarted);
   ValueNotifier<int> activeIndexNotifier = ValueNotifier(-1);
 
 
-  void setUserRole(String name) {
-    setState(() {
-      userRole.value = name;
-      cvstCtrl.setUserRole(name);
-      cvstCtrl.reset();
-    });
-  }
-
   @override
   void initState() {
+    cvstCtrl = ConversationController(this.widget.conversation);
     super.initState();
     cvstCtrl.initState();
     cvstCtrl.setUserRole('Tom');
     cvstCtrl.addListener(this);
-    print("&&&***&&& init state");
   }
 
   @override
@@ -116,7 +111,7 @@ class _ConversationScreenState extends State<ConversationScreen>
                     child: Column(
                       children: [
                         Text(
-                          "Buying Textbook",
+                          cvstCtrl.conversation.title,
                           style: TextStyle(fontSize: 18),
                         ),
                         SizedBox(height: 20),

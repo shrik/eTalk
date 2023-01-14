@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:myartist/src/features/talks/conversation_info.dart';
 
+import '../../../../../shared/classes/classes.dart';
+import '../../../lib/caption.dart';
 import '../../../talks.dart';
 
 String englishPercentPrompt(String text, int step) {
@@ -19,8 +21,8 @@ String englishPercentPrompt(String text, int step) {
 
 
 class PromptWidget extends StatefulWidget {
-  final SentenceInfo sentenceInfo;
-  final int initPromptType;
+  final Sentence sentenceInfo;
+  final CaptionEnum initPromptType;
   const PromptWidget({required this.sentenceInfo,
     required this.initPromptType, Key? key}) : super(key: key);
 
@@ -29,12 +31,7 @@ class PromptWidget extends StatefulWidget {
 }
 
 class _PromptWidgetState extends State<PromptWidget> {
-  int promptType = 0;
-  static const int hasCaption = 0;
-  static const int fiftyPercentPrompt = 1;
-  static const int twentyfivePercentPrompt = 2;
-  static const int chinesePrompt = 3;
-  static const int noCaption = 4;
+  CaptionEnum promptType = CaptionEnum.OriginalText;
 
   @override
   void initState(){
@@ -45,43 +42,45 @@ class _PromptWidgetState extends State<PromptWidget> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      builder: (context, int captionOption, child) {
-        String promptText = "";
-        List<String> userRoles = ConversationInheried.of(context).conversationControler.userRoles;
-        bool isSpeaker = userRoles.contains(widget.sentenceInfo.speaker);
-        if(!isSpeaker){
-          return SizedBox(height: 20,);
-        }else{
-          if(captionOption == noCaption || captionOption == hasCaption){
+      builder: (context, CaptionEnum captionOption, child) {
+        return ValueListenableBuilder(valueListenable: ConversationInheried.of(context).userRoleNotifier, builder: (context, String userRole, childe){
+          String promptText = "";
+          bool isSpeaker = userRole == widget.sentenceInfo.speaker;
+          if(!isSpeaker){
             return SizedBox(height: 20,);
+          }else{
+            if(captionOption == CaptionEnum.HideOriginalText || captionOption == CaptionEnum.OriginalText){
+              return SizedBox(height: 20,);
+            }
+            if (captionOption == CaptionEnum.FiftyPercentPrompt) {
+              promptText = englishPercentPrompt(widget.sentenceInfo.text, 2);
+            }
+            if (captionOption == CaptionEnum.TwentyFivePercentPrompt) {
+              promptText = englishPercentPrompt(widget.sentenceInfo.text, 4);
+            }
+            if (captionOption == CaptionEnum.ChinesePrompt) {
+              promptText = "这里是中文提示";
+            }
+            return IntrinsicWidth(child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: Colors.grey,
+                  size: 15,
+                ),
+                SizedBox(
+                  width: 5,
+                ),
+                Text(
+                  promptText,
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                )
+              ],
+              // mainAxisAlignment: MainAxisAlignment.center,
+            ),
+            );
           }
-          if (captionOption == fiftyPercentPrompt) {
-            promptText = englishPercentPrompt(widget.sentenceInfo.text, 2);
-          }
-          if (captionOption == twentyfivePercentPrompt) {
-            promptText = englishPercentPrompt(widget.sentenceInfo.text, 4);
-          }
-          if (captionOption == chinesePrompt) {
-            promptText = "这里是中文提示";
-          }
-          return Row(
-            children: [
-              Icon(
-                Icons.info_outline,
-                color: Colors.grey,
-                size: 15,
-              ),
-              SizedBox(
-                width: 5,
-              ),
-              Text(
-                promptText,
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              )
-            ],
-            mainAxisAlignment: MainAxisAlignment.center,
-          );
-        }
+        });
       },
       valueListenable: ConversationInheried.of(context).captionValueNotifier,);
   }

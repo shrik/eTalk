@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../shared/classes/classes.dart';
-import '../../../shared/extensions.dart';
+
 
 class HomeContent extends StatelessWidget {
   const HomeContent({
     super.key,
-    required this.artists,
+    required this.lessons,
     required this.constraints,
   });
 
-  final List<Artist> artists;
+  final List<Lesson> lessons;
   final BoxConstraints constraints;
 
   @override
@@ -33,12 +33,12 @@ class HomeContent extends StatelessWidget {
                 SizedBox(height: 5,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: artists.map((e) => buildTile(context, e)).toList(),
+                  children: lessons.map((e) => buildCard(context, e)).toList(),
                 ),
                 SizedBox(height: 5,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: artists.map((e) => buildTile(context, e)).toList(),
+                  children: lessons.map((e) => buildCard(context, e)).toList(),
                 ),
                 SizedBox(width: 100, height: 10,),
                 Row(
@@ -53,7 +53,7 @@ class HomeContent extends StatelessWidget {
                 SizedBox(height: 5,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: artists.map((e) => buildTile(context, e)).toList(),
+                  children: lessons.map((e) => buildCard(context, e)).toList(),
                 ),
                 SizedBox(height: 30,),
                 SizedBox(
@@ -73,23 +73,23 @@ class HomeContent extends StatelessWidget {
     );
   }
   final double cardWidth = 100;
-  Widget buildTile(BuildContext context, Artist artist) {
+  Widget buildCard(BuildContext context, Lesson lesson) {
     return SizedBox(
       width: cardWidth,
       // height: 250,
       child: InkWell(
           onTap: () {
-            GoRouter.of(context).push("/talks/buyingtextbook");
+            GoRouter.of(context).push("/talks/" + lesson.id.toString());
           },
           child: Column(
             children: [
               ClipRRect(
-                child: Image(image: AssetImage(artist.image.image), width: cardWidth),
+                child: Image.network(lesson.coverUrl(), width: cardWidth),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               SizedBox(
                 width: cardWidth,
-                child: Text("Some Description Here", maxLines: 2,),
+                child: Text(lesson.name, maxLines: 2,),
               ),
               SizedBox(
                 width: cardWidth,
