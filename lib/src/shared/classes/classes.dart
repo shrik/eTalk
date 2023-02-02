@@ -7,3 +7,5 @@ export './ranked_song.dart';
 export './song.dart';
 export './lesson.dart';
 export './conversation.dart';
+export './label.dart';
+export './user.dart';

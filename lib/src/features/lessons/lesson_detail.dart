@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myartist/src/features/lessons/favourite_star_widget.dart';
 import '../../shared/classes/classes.dart';
 
-class CourseDetail extends StatelessWidget {
+class LessonDetail extends StatelessWidget {
   final Lesson lesson;
-  const CourseDetail({super.key, required this.lesson});
+  const LessonDetail({super.key, required this.lesson});
   @override
   Widget build(BuildContext context) {
     final List<Conversation> conversations = lesson.conversations;
@@ -82,7 +83,7 @@ class CourseDetail extends StatelessWidget {
                 onPressed: () { },
                 child: Text('开始对话'),
               ),
-              Icon(Icons.star_border),
+              FavouriteStarWidget(isFavourite: false, objectId: lesson.id),
             ],
           ),
         )

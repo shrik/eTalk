@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:async/async.dart';
+import '../../lib/settings.dart';
 import '../../shared/classes/classes.dart';
 import 'conversation_info.dart';
 
@@ -48,7 +49,7 @@ class CheckInputStep{
     if (bytes.lengthInBytes > maxLen) {
       bytes = bytes.sublist(bytes.lengthInBytes - maxLen);
     }
-    Uri uri = Uri.http("192.168.3.17:8888", "/asr_match");
+    Uri uri = Uri.http(ASR_HOST, "/asr_match");
     var request = new http.MultipartRequest('POST', uri);
     final httpImage = await http.MultipartFile.fromBytes("upload_file", bytes,
         filename: "audio.wav");

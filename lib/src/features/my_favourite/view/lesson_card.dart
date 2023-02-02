@@ -6,17 +6,17 @@ import '../../../shared/extensions.dart';
 import '../../../shared/views/outlined_card.dart';
 import '../../../shared/views/views.dart';
 
-class ArtistCard extends StatelessWidget {
-  const ArtistCard({
+class LessonCard extends StatelessWidget {
+  const LessonCard({
     super.key,
-    required this.artist,
+    required this.lesson,
   });
 
-  final Artist artist;
+  final Lesson lesson;
 
   @override
   Widget build(BuildContext context) {
-    Song nowPlaying = artist.songs[Random().nextInt(artist.songs.length)];
+    // Song nowPlaying = lesson.songs[Random().nextInt(lesson.songs.length)];
 
     return OutlinedCard(
       child: LayoutBuilder(
@@ -24,10 +24,7 @@ class ArtistCard extends StatelessWidget {
           children: [
             SizedBox(
               width: dimens.maxWidth * 0.4,
-              child: Image.asset(
-                artist.image.image,
-                fit: BoxFit.cover,
-              ),
+              child: Image.network(lesson.coverUrl(), fit:BoxFit.cover,)
             ),
             Expanded(
               child: Padding(
@@ -42,37 +39,37 @@ class ArtistCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              artist.name,
+                              lesson.name,
                               style: context.titleMedium,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
                             const SizedBox(height: 10),
                             Text(
-                              artist.bio,
+                              lesson.description,
                               overflow: TextOverflow.ellipsis,
                               style: context.labelSmall,
                               maxLines: 3,
                             ),
                           ]),
                     ),
-                    if (dimens.maxHeight > 100)
-                      Row(
-                        children: [
-                          HoverableSongPlayButton(
-                            size: const Size(50, 50),
-                            song: nowPlaying,
-                            child: Icon(Icons.play_circle,
-                                color: context.colors.tertiary),
-                          ),
-                          Text(
-                            nowPlaying.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.clip,
-                            style: context.labelMedium,
-                          ),
-                        ],
-                      ),
+                    // if (dimens.maxHeight > 100)
+                    //   Row(
+                    //     children: [
+                    //       HoverableSongPlayButton(
+                    //         size: const Size(50, 50),
+                    //         song: nowPlaying,
+                    //         child: Icon(Icons.play_circle,
+                    //             color: context.colors.tertiary),
+                    //       ),
+                    //       Text(
+                    //         nowPlaying.title,
+                    //         maxLines: 1,
+                    //         overflow: TextOverflow.clip,
+                    //         style: context.labelMedium,
+                    //       ),
+                    //     ],
+                    //   ),
                   ],
                 ),
               ),

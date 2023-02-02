@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:myartist/src/shared/providers/lessons.dart';
 
 import '../../../shared/classes/classes.dart';
-import '../../../shared/extensions.dart';
-import '../../../shared/providers/providers.dart';
-import '../../../shared/views/views.dart';
-import '../../playlists/view/playlist_songs.dart';
 import 'view.dart';
 
 class HomeScreen extends StatefulWidget {

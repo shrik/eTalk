@@ -79,7 +79,7 @@ class HomeContent extends StatelessWidget {
       // height: 250,
       child: InkWell(
           onTap: () {
-            GoRouter.of(context).push("/talks/" + lesson.id.toString());
+            GoRouter.of(context).push("/lessons/" + lesson.id.toString());
           },
           child: Column(
             children: [

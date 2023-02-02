@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myartist/src/features/courses/course_detail.dart';
+import 'package:myartist/src/features/lessons/lesson_detail.dart';
+import 'package:myartist/src/features/my/login_page.dart';
 import 'package:myartist/src/features/my/my_home.dart';
+import 'package:myartist/src/features/my/register_page.dart';
+import 'package:myartist/src/shared/providers/auth_provider.dart';
 import 'package:myartist/src/shared/providers/conversations.dart';
 import 'package:myartist/src/shared/providers/lessons.dart';
+import 'package:provider/provider.dart';
 
-import '../features/artists/artists.dart';
+import '../features/lessons/lesson_detail.dart';
+import '../features/my_favourite/my_favourite.dart';
 import '../features/talks/talks.dart';
 import '../features/home/home.dart';
-import '../features/playlists/playlists.dart';
-import '../features/playlists/view/view.dart';
+import '../features/label_lessons/playlists.dart';
+import '../features/label_lessons/view/view.dart';
 import 'classes/classes.dart';
 import 'providers/artists.dart';
 import 'providers/playlists.dart';
+import 'providers/providers.dart';
 import 'views/views.dart';
 
 const _pageKey = ValueKey('_pageKey');
@@ -30,12 +36,12 @@ const List<NavigationDestination> destinations = [
   NavigationDestination(
     label: '资源',
     icon: Icon(Icons.playlist_add_check), // Modify this line
-    route: '/playlists',
+    route: '/label_lessons',
   ),
   NavigationDestination(
     label: '收藏',
     icon: Icon(Icons.people), // Modify this line
-    route: '/artists',
+    route: '/my_favourite',
   ),
   NavigationDestination(
     label: '我的',
@@ -72,16 +78,39 @@ final appRouter = GoRouter(
         ),
       ),
     ),
+    GoRoute(
+      path: '/login',
+      pageBuilder: (context, state) => MaterialPage<void>(
+        key: _pageKey,
+        child: LoginPage()
+      ),
+    ),
+    GoRoute(path: "/register",
+    pageBuilder: (context, state) => MaterialPage<void>(
+      key: _pageKey,
+      child: RegisterPage()
+    )),
 
     // PlaylistHomeScreen
     GoRoute(
-      path: '/playlists',
-      pageBuilder: (context, state) => const MaterialPage<void>(
+      path: '/label_lessons',
+      pageBuilder: (context, state) => MaterialPage<void>(
         key: _pageKey,
         child: RootLayout(
           key: _scaffoldKey,
           currentIndex: 1,
-          child: PlaylistHomeScreen(),
+          child: FutureBuilder(
+              future: LabelLessonsProvider.homeLabels(),
+          builder: (context, AsyncSnapshot<Map> snapshot){
+            if(snapshot.hasData){
+              return LabelLessonsHome(data: snapshot.data!);
+            }else if(snapshot.hasError){
+              print(snapshot.stackTrace!);
+              throw snapshot.error!;
+            }else{
+              return Text("Loading");
+            }
+          }),
         ),
       ),
       routes: [
@@ -103,33 +132,37 @@ final appRouter = GoRouter(
 
     // ArtistHomeScreen
     GoRoute(
-      path: '/artists',
-      pageBuilder: (context, state) => const MaterialPage<void>(
+      path: '/my_favourite',
+      pageBuilder: (context, state) => MaterialPage<void>(
         key: _pageKey,
         child: RootLayout(
           key: _scaffoldKey,
           currentIndex: 2,
-          child: ArtistsScreen(),
+          child: Builder(
+            builder: (context) {
+              AuthProvider auth = Provider.of<AuthProvider>(context, listen: false);
+              if(auth.loggedInStatus == Status.LoggedIn){
+                return FutureBuilder(
+                    future: LessonProvider.getMyFavouriteLessons(user: auth.getUser()),
+                    builder: (context, AsyncSnapshot<List<Lesson>> snapshot){
+                      if (snapshot.hasData) {
+
+                        return MyFavourite(lessons: snapshot.data!);
+                      } else if (snapshot.hasError) {
+                        print(snapshot.stackTrace!);
+                        throw snapshot.error!;
+                      } else {
+                        return Text("Loading");
+                      }
+                    }
+                );
+              }else{
+                return Text("还未登录，请先登录");
+              }
+              },
+          )
         ),
       ),
-      routes: [
-        GoRoute(
-          path: ':aid',
-          pageBuilder: (context, state) => MaterialPage<void>(
-            key: state.pageKey,
-            child: RootLayout(
-              key: _scaffoldKey,
-              currentIndex: 2,
-              child: ArtistScreen(
-                artist: artistsProvider.getArtist(state.params['aid']!)!,
-              ),
-            ),
-          ),
-          // builder: (context, state) => ArtistScreen(
-          //   id: state.params['aid']!,
-          // ),
-        ),
-      ],
     ),
     GoRoute(
       path: "/my",
@@ -166,7 +199,7 @@ final appRouter = GoRouter(
       ]
     ),
     GoRoute(
-      path: '/talks',
+      path: '/lessons',
       pageBuilder: (context, state) => MaterialPage<void>(
         child: Text("")
       ),
@@ -178,7 +211,7 @@ final appRouter = GoRouter(
                   future: LessonProvider.getLesson(state.params["lesson_id"]!),
                   builder: (context, AsyncSnapshot<Lesson> snapshot) {
                     if (snapshot.hasData) {
-                      return CourseDetail(lesson: snapshot.data!);
+                      return LessonDetail(lesson: snapshot.data!);
                     } else if (snapshot.hasError) {
                       print(snapshot.stackTrace!);
                       throw snapshot.error!;

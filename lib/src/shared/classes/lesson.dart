@@ -1,7 +1,8 @@
 import 'package:myartist/src/shared/classes/classes.dart';
+import '../../lib/settings.dart';
 
 class Lesson{
-  static String host="http://192.168.3.17:8000";
+  static String host="http://" + IMAGE_HOST;
   Lesson({
     required this.id,
     required this.cover_path,

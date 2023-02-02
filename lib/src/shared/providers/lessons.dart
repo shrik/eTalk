@@ -12,10 +12,10 @@ class LessonProvider {
     return lessons;
   }
 
-  static Future<List<Lesson>> getMyFavouriteLessons() async {
-    Map resp = await ApiReq.get("/api/my_lessons");
+  static Future<List<Lesson>> getMyFavouriteLessons({required User user}) async {
+    List lessonItems = await ApiReq.getList("/api/my_lessons", token: user.token);
     List<Lesson> lessons = [];
-    for(Map item in resp["content"] as List<Map> ){
+    for(Map item in lessonItems ){
       Lesson lesson = Lesson.fromMap(item);
       lessons.add(lesson);
     }

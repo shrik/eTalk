@@ -14,6 +14,7 @@ import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDi
 
 
 import '../../../../audio/audio_client.dart';
+import '../../../../lib/settings.dart';
 
 
 
@@ -38,7 +39,7 @@ class _UploadButtonState extends State<UploadButton> {
     if(bytes.lengthInBytes > maxLen){
       bytes = bytes.sublist(bytes.lengthInBytes - maxLen);
     }
-    Uri uri = Uri.http("192.168.3.100:8888", "/asr");
+    Uri uri = Uri.http(ASR_HOST, "/asr");
     var request = new http.MultipartRequest('POST', uri);
     final httpImage = await http.MultipartFile.fromBytes("upload_file", bytes,
       filename: "audio.wav");
