@@ -6,6 +6,7 @@ import '../../../shared/classes/classes.dart';
 import './lesson_card.dart';
 
 import '../../../shared/providers/artists.dart';
+import 'not_logged.dart';
 
 class MyFavourite extends StatelessWidget {
   const MyFavourite({required this.lessons, super.key});
@@ -40,7 +41,9 @@ class MyFavourite extends StatelessWidget {
               child: LessonCard(
                 lesson: lesson,
               ),
-              onTap: () => GoRouter.of(context).go('/lessons/${lesson.id}'),
+              onTap: () {
+                GoRouter.of(context).push('/lessons/${lesson.id}');
+              },
             );
           },
         ),

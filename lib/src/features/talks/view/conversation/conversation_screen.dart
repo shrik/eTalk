@@ -5,8 +5,6 @@ import 'package:myartist/src/features/talks/view/conversation/views/controller_v
 import '../../../../lib/listener_interface.dart';
 import '../../../../shared/classes/classes.dart';
 import '../../conversation_controller.dart';
-import '../../conversation_info.dart';
-import 'views/content_view.dart';
 
 
 class ConversationInheried extends InheritedWidget{
@@ -61,7 +59,7 @@ class ConversationScreen extends StatefulWidget {
 class _ConversationScreenState extends State<ConversationScreen>
     with ListenerInterface {
   late ConversationController cvstCtrl ;
-  ValueNotifier<String> userRole = ValueNotifier("Tom");
+  ValueNotifier<String> userRole = ValueNotifier("");
   ValueNotifier<CaptionEnum> captionOptionValue = ValueNotifier(CaptionEnum.OriginalText);
   ValueNotifier<ConversationStatus> currentStateNotifier = ValueNotifier(ConversationStatus.NotStarted);
   ValueNotifier<int> activeIndexNotifier = ValueNotifier(-1);
@@ -72,7 +70,7 @@ class _ConversationScreenState extends State<ConversationScreen>
     cvstCtrl = ConversationController(this.widget.conversation);
     super.initState();
     cvstCtrl.initState();
-    cvstCtrl.setUserRole('Tom');
+    cvstCtrl.setUserRole(cvstCtrl.conversationInfo.speakers[0]);
     cvstCtrl.addListener(this);
   }
 

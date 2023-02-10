@@ -30,6 +30,7 @@ class ActiveSection extends StatelessWidget{
               Row(children: [
                 Expanded(
                     child: Padding(
+
                         padding: EdgeInsets.fromLTRB(15, 0, 0, 0),
                         child: Column(
                           children: [

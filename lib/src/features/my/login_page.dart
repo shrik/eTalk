@@ -1,6 +1,7 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myartist/src/features/my/register_page.dart';
 import '../../shared/providers/auth_provider.dart';
 import 'utility/validator.dart';
 import 'utility/widgets.dart';
@@ -31,11 +32,15 @@ class _LoginPageState extends State<LoginPage> {
 
         respose.then((response) {
           if (response['status']) {
-            GoRouter.of(context).go("/my");
+            // login successed
+            Navigator.of(context).pop();
+            // Navigator.of(context).restorable
+            // Navigator.of(context).pushReplacementNamed("routeName")
+            // GoRouter.of(context).go("/my");
           } else {
             Flushbar(
-              title: "Failed Login",
-              message: response['msg'].toString(),
+              title: "登录失败",
+              message: response['message'].toString(),
               duration: Duration(seconds: 3),
             ).show(context);
           }
@@ -74,7 +79,12 @@ class _LoginPageState extends State<LoginPage> {
             child:
                 Text("Sign up", style: TextStyle(fontWeight: FontWeight.w300)),
             onPressed: () {
-              GoRouter.of(context).go("/register");
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                      builder: (context){
+                          return RegisterPage();
+              }));
+              // GoRouter.of(context).go("/register");
             },
           ),
           padding: EdgeInsets.only(left: 0.0),

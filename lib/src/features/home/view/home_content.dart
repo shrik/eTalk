@@ -30,15 +30,17 @@ class HomeContent extends StatelessWidget {
                         style: TextStyle(fontSize: 14, color: Colors.grey))
                     ],
                 ),
-                SizedBox(height: 5,),
+                SizedBox(height: 20,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: lessons.map((e) => buildCard(context, e)).toList(),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: lessons.sublist(0, 3).map((e) => buildCard(context, e)).toList(),
                 ),
-                SizedBox(height: 5,),
+                SizedBox(height: 10,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: lessons.map((e) => buildCard(context, e)).toList(),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: lessons.sublist(3,6).map((e) => buildCard(context, e)).toList(),
                 ),
                 SizedBox(width: 100, height: 10,),
                 Row(
@@ -50,10 +52,10 @@ class HomeContent extends StatelessWidget {
                         style: TextStyle(fontSize: 14, color: Colors.grey))
                   ],
                 ),
-                SizedBox(height: 5,),
+                SizedBox(height: 5),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: lessons.map((e) => buildCard(context, e)).toList(),
+                  children: lessons.sublist(0,3).map((e) => buildCard(context, e)).toList(),
                 ),
                 SizedBox(height: 30,),
                 SizedBox(

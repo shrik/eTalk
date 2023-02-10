@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myartist/src/features/my/login_page.dart';
 import 'package:myartist/src/features/my/utility/shared_preference.dart';
+import 'package:myartist/src/features/my/views/contact_us.dart';
 import 'package:myartist/src/shared/classes/classes.dart';
 import 'package:myartist/src/shared/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
@@ -69,8 +71,12 @@ class MyHome extends StatelessWidget {
                               alignment: Alignment.centerRight,
                               child: InkWell(
                                 child: Text("登录"),
-                                onTap: () {
-                                  GoRouter.of(context).go("/login");
+                                onTap: () async {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (context) {
+                                      return LoginPage();
+                                    })
+                                  );
                                 },
                               ),
                             )),
@@ -106,9 +112,13 @@ class MyHome extends StatelessWidget {
                             SizedBox(
                               width: 20,
                             ),
-                            Text(
-                              "我的收藏",
-                              style: TextStyle(fontSize: 16),
+                            InkWell(
+                             child: Text(
+                               "我的收藏",
+                               style: TextStyle(fontSize: 16),
+                             ), onTap: (){
+                               GoRouter.of(context).go("/my_favourite");
+                            },
                             ),
                           ],
                         )),
@@ -187,10 +197,19 @@ class MyHome extends StatelessWidget {
                             SizedBox(
                               width: 20,
                             ),
-                            Text(
-                              "联系我们",
-                              style: TextStyle(fontSize: 16),
-                            ),
+                            InkWell(
+                              child: Text(
+                                "联系我们",
+                                style: TextStyle(fontSize: 16),
+                              ),onTap: (){
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context){
+                                    return ContactUs();
+                                  })
+                                );
+                            },
+                            )
+                            ,
                           ],
                         )),
                     onTap: () {},

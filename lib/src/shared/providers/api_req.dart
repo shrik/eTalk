@@ -66,11 +66,21 @@ class ApiReq{
     return decodedResponse["result"] as Map;
   }
 
-  static Future<List<Lesson>> getLabelLessons(String labelId) async {
-    Uri uri = Uri.http(host, "/api/label_lessons/" + labelId);
+  static Future<List<Lesson>> getAllLessons(int pageKey, int _pageSize) async {
+    Uri uri = Uri.http(host, "/api/all_lessons",
+        {"page": pageKey.toString(), "page_size": _pageSize.toString()});
     var response = await client.get(uri);
     var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-    var lessons = decodedResponse["result"] as List<Map>;
+    var lessons = decodedResponse["result"] as List<dynamic>;
+    return lessons.map((e) => Lesson.fromMap(e)).toList();
+  }
+
+  static Future<List<Lesson>> getLabelLessons(String labelId, int pageKey, int pageSize) async {
+    Uri uri = Uri.http(host, "/api/label_lessons/" + labelId ,
+        {"page": pageKey.toString(), "page_size":pageSize.toString()});
+    var response = await client.get(uri);
+    var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    var lessons = decodedResponse["result"] as List;
     return lessons.map((e) => Lesson.fromMap(e)).toList();
   }
 

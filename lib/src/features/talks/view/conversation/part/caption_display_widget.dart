@@ -95,7 +95,7 @@ class _CaptionDisplayWidgetState extends State<CaptionDisplayWidget> {
     ConversationController cvstCtrl = ConversationInheried.of(context).conversationControler;
     Widget showText = Text(sentenceInfo.text,
         style: TextStyle(fontSize: 16, color: Colors.grey[800]),
-        maxLines: 2,
+        maxLines: 5,
         overflow: TextOverflow.ellipsis);
     if(clicked){
       return showText;

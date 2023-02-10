@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 
 import '../features/lessons/lesson_detail.dart';
 import '../features/my_favourite/my_favourite.dart';
+import '../features/my_favourite/view/not_logged.dart';
 import '../features/talks/talks.dart';
 import '../features/home/home.dart';
 import '../features/label_lessons/playlists.dart';
@@ -157,7 +158,7 @@ final appRouter = GoRouter(
                     }
                 );
               }else{
-                return Text("还未登录，请先登录");
+                return  NotLogged();
               }
               },
           )

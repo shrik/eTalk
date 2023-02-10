@@ -94,26 +94,30 @@ class AuthProvider extends ChangeNotifier {
     if (response.statusCode == 200) {
 
       final Map<String, dynamic> responseData = json.decode(response.body);
-
       print(responseData);
-
-      var userData = responseData['result']['user'];
-
-      User authUser = User.fromJson(userData);
-
-      UserPreferences().saveUser(authUser);
-
-      _loggedInStatus = Status.LoggedIn;
-      notifyListeners();
-
-      result = {'status': true, 'message': 'Successful', 'user': authUser};
+      if(responseData["status"] as String == "FAIL"){
+        _loggedInStatus = Status.NotLoggedIn;
+        notifyListeners();
+        result = {
+          'status': false,
+          'message': responseData["msg"]
+        };
+      }else{
+        var userData = responseData['result']['user'];
+        User authUser = User.fromJson(userData);
+        UserPreferences().saveUser(authUser);
+        _user = authUser;
+        _loggedInStatus = Status.LoggedIn;
+        notifyListeners();
+        result = {'status': true, 'message': 'Successful', 'user': authUser};
+      }
 
     } else {
       _loggedInStatus = Status.NotLoggedIn;
       notifyListeners();
       result = {
         'status': false,
-        'message': json.decode(response.body)['error']
+        'message': "Server Error!"
       };
     }
 
