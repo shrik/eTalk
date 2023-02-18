@@ -58,7 +58,7 @@ class ConversationController {
   }
 
   bool isRecording(){
-    return [ListenSpeakerStep, CheckInputStep].contains(currentStep.runtimeType);
+    return [ListenSpeakerStep].contains(currentStep.runtimeType);
   }
 
   void setUserRole(String name){

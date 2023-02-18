@@ -3,13 +3,13 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 import 'package:synchronized/synchronized.dart';
-import 'package:async/async.dart';
 import '../../lib/settings.dart';
 import '../../shared/classes/classes.dart';
-import 'conversation_info.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'dart:convert';
+
 
 abstract class RunningStep{
   bool stopped = false;
@@ -38,55 +38,6 @@ abstract class RunningStep{
   }
 }
 
-class CheckInputStep{
-  bool? result;
-
-  Future<bool> audioMatchContent(Uint8List bytes, String text, ListenSpeakerStep listenSpeakerStep) async {
-    int seconds = 7;
-    int channel = 1;
-    int bytesPerSignal = 2;
-    int maxLen = bytesPerSignal * listenSpeakerStep.tSampleRate * channel * seconds;
-    if (bytes.lengthInBytes > maxLen) {
-      bytes = bytes.sublist(bytes.lengthInBytes - maxLen);
-    }
-    Uri uri = Uri.http(ASR_HOST, "/asr_match");
-    var request = new http.MultipartRequest('POST', uri);
-    final httpImage = await http.MultipartFile.fromBytes("upload_file", bytes,
-        filename: "audio.wav");
-    // request.fields.putIfAbsent(key, () => null)
-    request.files.add(httpImage);
-    request.fields.addAll({"text": text});
-    http.StreamedResponse resp;
-    try{
-      resp = await request.send().timeout(const Duration(seconds: 1));
-      String res = await resp.stream.bytesToString();
-      return res.contains("true");
-    }on TimeoutException catch(e){
-      return false;
-    }catch(e){
-      print("Error Please Handle this Error");
-      return false;
-    }
-
-  }
-
-
-  @override
-  Future<bool> run(ListenSpeakerStep listenSpeakerStep) async {
-      var bytesBuilder = listenSpeakerStep.bytesBuilder;
-      var sentenceInfo = listenSpeakerStep.sentenceInfo;
-      Uint8List bytes = bytesBuilder.toBytes();
-      bool match;
-      try{
-        match = await audioMatchContent(bytes, sentenceInfo.text, listenSpeakerStep);
-      }catch(e){
-        rethrow;
-      }
-      result = match;
-      return result!;
-  }
-}
-
 class ListenSpeakerStep extends RunningStep {
   FlutterSoundRecorder recorder;
   Sentence sentenceInfo;
@@ -98,10 +49,26 @@ class ListenSpeakerStep extends RunningStep {
   bool checkSuccessed = false;
   Lock lock = Lock();
   Future? currentRunning;
-  CancelableOperation<bool>? checkingOp;
-
-
+  final channel = WebSocketChannel.connect(
+    Uri.parse('ws://${ASR_HOST}/paddlespeech/asr/l2talk_streaming'),
+  );
+  int bytesBuilderLength = 0;
+  Lock wslock = Lock();
+  bool _terminated = false;
   ListenSpeakerStep(this.recorder, this.sentenceInfo, this.tSampleRate);
+
+  void processStreamAudio(BytesBuilder builder){
+    int chunk_size = (85 * tSampleRate ~/ 1000); // 85ms, sample_rate = 16kHz
+    if(bytesBuilderLength >= chunk_size){
+      Uint8List bytes = builder.takeBytes();
+      int chunks_count = bytesBuilderLength ~/ chunk_size;
+      Uint8List data = bytes.sublist(0, chunks_count * chunk_size);
+      builder.add(bytes.sublist(chunks_count*chunk_size, bytesBuilderLength));
+      bytesBuilderLength = bytesBuilderLength % chunk_size;
+      channel.sink.add(data);
+    }
+
+  }
 
   @override
   Future<void> run() async {
@@ -111,11 +78,27 @@ class ListenSpeakerStep extends RunningStep {
       await soundEffectPlayer.play();
       await recorder.openRecorder();
       recordingDataController = StreamController<Food>();
+      channel.stream.listen((event) {
+        Map res = jsonDecode(event as String);
+        if(res["success"] != null && res["success"]){
+          _terminated = true;
+        }
+      });
+      channel.sink.add(jsonEncode({
+        "name": "test.wav",
+        "signal": "start",
+        "sentence": sentenceInfo.text,
+        "nbtest": 1
+      }));
       recorderDataSubscription =
-          recordingDataController!.stream.listen((buffer) {
-            if (buffer is FoodData) {
-              bytesBuilder.add(buffer.data!);
-            }
+          recordingDataController!.stream.listen((buffer) async {
+            await wslock.synchronized(() {
+              if (buffer is FoodData) {
+                bytesBuilder.add(buffer.data!);
+                bytesBuilderLength += buffer.data!.length;
+                processStreamAudio(bytesBuilder);
+              };
+            });
           });
       await recorder.startRecorder(
         toStream: recordingDataController!.sink,
@@ -123,59 +106,40 @@ class ListenSpeakerStep extends RunningStep {
         numChannels: 1,
         sampleRate: tSampleRate,
       );
-      currentRunning = check();
     });
-    await currentRunning;
+    currentRunning = await Future(() async {
+      while(!_terminated){
+        await Future.delayed(Duration(milliseconds: 20));
+      }
+      channel.sink.add(jsonEncode({
+        "name": "test.wav",
+        "signal": "end",
+        "nbtest": 1
+      }));
+      await dispose();
+    });
+  }
+
+  Future<void> dispose() async {
+    await recorderDataSubscription?.cancel();
+    await recorder.closeRecorder();
+    await soundEffectPlayer.dispose();
+    bytesBuilder.clear();
+    bytesBuilderLength = 0;
+    await channel.sink.close();
   }
 
   @override
   Future<void> cancel() async {
     await stop();
-    await lock.synchronized(() async {
-      await recorderDataSubscription?.cancel();
-      await recorder.closeRecorder();
-      await soundEffectPlayer.dispose();
-    });
     await finish();
-  }
-
-  Future<void> check() async {
-      while(!checkSuccessed && !stopped){
-        await lock.synchronized(() {
-          if(!stopped){
-            checkingOp = CancelableOperation.fromFuture(Future(() async {
-              await Future.delayed(const Duration(seconds: 1),(){});
-              print("In checking Input");
-              CheckInputStep checkInputStep = CheckInputStep();
-              bool result = await checkInputStep!.run(this);
-              return result;
-            }), onCancel: () => false);
-          }else{
-            checkingOp = null;
-          }
-        });
-        if(checkingOp == null){
-          return;
-        }else{
-          checkSuccessed = (await checkingOp!.valueOrCancellation(false))!;
-          checkingOp = null;
-        }
-      }
-      if(checkSuccessed){
-        await lock.synchronized(() async {
-          await recorderDataSubscription!.cancel();
-          await recorder.closeRecorder();
-          await soundEffectPlayer.dispose();
-        });
-      }
   }
 
   @override
   Future<void> stop() async {
     await lock.synchronized(() async {
       await super.stop();
-      checkingOp?.cancel();
-      await recorder.pauseRecorder();
+      _terminated = true;
     });
     await currentRunning;
     currentRunning = null;
@@ -186,10 +150,8 @@ class ListenSpeakerStep extends RunningStep {
   Future<void> resume() async {
     await lock.synchronized(() async {
       await super.resume();
-      await recorder.resumeRecorder();
-      currentRunning = check();
     });
-    await currentRunning;
+    await run();
   }
 }
 

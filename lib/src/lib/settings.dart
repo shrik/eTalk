@@ -1,4 +1,4 @@
-String HOST = "192.168.0.103";
+String HOST = "192.168.3.129";
 String API_HOST = HOST + ":8000";
 String IMAGE_HOST = HOST + ":8000";
-String ASR_HOST= HOST + ":8888";
+String ASR_HOST= "39.106.81.243:8090";

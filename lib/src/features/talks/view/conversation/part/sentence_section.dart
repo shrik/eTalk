@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:myartist/src/features/talks/talks.dart';
 
 import '../../../../../shared/classes/classes.dart';
 import '../../../conversation_info.dart';
@@ -27,6 +29,17 @@ class _SentenceSectionState extends State<SentenceSection> {
     super.initState();
     isActive = widget.index == widget.activeIndexNotifier.value;
     widget.activeIndexNotifier.addListener(_activeIndexChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if(isActive){
+        var _scrollCtl =  ContentViewInheried.of(context).scrollController;
+        var _scrollKey = ContentViewInheried.of(context).relative_element_key;
+        RenderBox renderBox = context.findRenderObject() as RenderBox;
+        final Offset offset = renderBox.localToGlobal(Offset.zero,
+            ancestor: _scrollKey.currentContext!.findRenderObject() as RenderBox);
+        // print("${offset}  and position: ${_scrollCtl.offset}" );
+        _scrollCtl.animateTo(_scrollCtl.offset + offset.dy, duration: Duration(milliseconds: 200), curve: Curves.ease);
+      }
+    });
   }
 
   void _activeIndexChanged(){

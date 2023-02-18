@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myartist/src/features/my/login_page.dart';
+import 'package:myartist/src/features/my/test/test_cancelable_operation.dart';
+import 'package:myartist/src/features/my/test/test_list_page.dart';
+import 'package:myartist/src/features/my/test/test_websocket_page.dart';
 import 'package:myartist/src/features/my/utility/shared_preference.dart';
 import 'package:myartist/src/features/my/views/contact_us.dart';
 import 'package:myartist/src/shared/classes/classes.dart';
@@ -220,6 +223,80 @@ class MyHome extends StatelessWidget {
                     indent: 15,
                     endIndent: 15,
                   ),
+                  InkWell(
+                    child: Padding(
+                        padding:
+                        EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.perm_contact_cal,
+                              size: 20,
+                            ),
+                            SizedBox(
+                              width: 20,
+                            ),
+                            InkWell(
+                              child: Text(
+                                "Test Cancelabel",
+                                style: TextStyle(fontSize: 16),
+                              ),onTap: (){
+                              Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context){
+                                    return TestCancelabelOperationPage();
+                                  })
+                              );
+                            },
+                            )
+                            ,
+                          ],
+                        )),
+                    onTap: () {},
+                  ),
+                  Divider(
+                    thickness: 1,
+                    height: 10,
+                    indent: 15,
+                    endIndent: 15,
+                  ),
+                  InkWell(
+                    child: Padding(
+                        padding:
+                        EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.perm_contact_cal,
+                              size: 20,
+                            ),
+                            SizedBox(
+                              width: 20,
+                            ),
+                            InkWell(
+                              child: Text(
+                                "WebSocket Upload",
+                                style: TextStyle(fontSize: 16),
+                              ),onTap: (){
+                              Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context){
+                                    return TestWebsocketPage();
+                                  })
+                              );
+                            },
+                            )
+                            ,
+                          ],
+                        )),
+                    onTap: () {},
+                  ),
+                  Divider(
+                    thickness: 1,
+                    height: 10,
+                    indent: 15,
+                    endIndent: 15,
+                  ),
+
+
                   SizedBox(
                     height: 30,
                   ),

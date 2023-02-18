@@ -59,7 +59,7 @@ class _PromptWidgetState extends State<PromptWidget> {
               promptText = englishPercentPrompt(widget.sentenceInfo.text, 4);
             }
             if (captionOption == CaptionEnum.ChinesePrompt) {
-              promptText = "这里是中文提示";
+              promptText = widget.sentenceInfo.translation;
             }
             return IntrinsicWidth(child: Row(
               children: [

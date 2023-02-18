@@ -28,6 +28,6 @@ class Lesson{
   }
 
   String coverUrl(){
-    return host + cover_path;
+    return host + "/upload" + cover_path;
   }
 }

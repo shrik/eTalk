@@ -1,10 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:myartist/src/features/talks/conversation_controller.dart';
-import 'package:myartist/src/features/talks/view/view.dart';
 
 import '../../../../../shared/classes/classes.dart';
-import '../../../conversation_info.dart';
 import '../../../lib/caption.dart';
 
 class CaptionDisplayWidget extends StatefulWidget {
@@ -92,7 +90,9 @@ class _CaptionDisplayWidgetState extends State<CaptionDisplayWidget> {
     userRole = widget.userRoleNotifier.value;
     Sentence sentenceInfo = widget.sentenceInfo;
     String speaker = sentenceInfo.speaker;
-    ConversationController cvstCtrl = ConversationInheried.of(context).conversationControler;
+    // print("speaker is ${speaker} and userRole is ${userRole}");
+    // print("widget.captionOptionNotifier.value is ${widget.captionOptionNotifier.value} and "
+    //     "CaptionEnum.OriginalText is ${CaptionEnum.OriginalText}");
     Widget showText = Text(sentenceInfo.text,
         style: TextStyle(fontSize: 16, color: Colors.grey[800]),
         maxLines: 5,
@@ -101,11 +101,7 @@ class _CaptionDisplayWidgetState extends State<CaptionDisplayWidget> {
       return showText;
     }
     if(speaker == userRole && widget.captionOptionNotifier.value != CaptionEnum.OriginalText){
-      if(widget.activeIndexNotifier.value > widget.index) {
-        hide = false;
-      }else{
-        hide = true;
-      }
+      hide = true;
     }else{
       hide = false;
     }

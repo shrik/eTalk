@@ -3,6 +3,8 @@ import 'package:myartist/src/features/talks/conversation_controller.dart';
 import 'package:myartist/src/features/talks/talks.dart';
 
 import '../../../lib/caption.dart';
+import '../helpers.dart';
+import '../part/caption_controll_button.dart';
 
 class MainCtlButton extends StatelessWidget{
   final ConversationStatus cStatus;
@@ -53,16 +55,6 @@ class UserRoleCtlButton extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     ConversationController cvstCtrl = ConversationInheried.of(context).conversationControler;
-    final Widget lilyIcon = Container(
-        child: CircleAvatar(
-            backgroundImage: AssetImage("assets/images/artists/woman.jpeg")),
-        height: 30,
-        width: 30);
-    final Widget tomIcon = Container(
-        child: const CircleAvatar(
-            backgroundImage: AssetImage("assets/images/artists/joe.jpg")),
-        height:  30,
-        width: 30);
     ValueNotifier<String> userRoleNotifier = ConversationInheried.of(context).userRoleNotifier;
 
     return IconButton(
@@ -74,13 +66,20 @@ class UserRoleCtlButton extends StatelessWidget{
             context: context,
             builder: (context) {
               return SimpleDialog(
-                title: const Text('Select User Role'),
+                title: const Text('挑选扮演角色'),
                 children: cvstCtrl.Speakers.map((element) {
                   return SimpleDialogOption(
                     onPressed: () {
                       Navigator.pop(context, element);
                     },
-                    child: Text(element),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                            backgroundImage: AssetImage(getUserAvatarUrl(element))),
+                        SizedBox(width: 20,),
+                        Text(element),
+                      ],
+                    ),
                   );
                 }).toList(),
               );
@@ -89,56 +88,16 @@ class UserRoleCtlButton extends StatelessWidget{
           userRoleNotifier.value = role;
         }
       },
-      icon: userRole == 'Tom' ? tomIcon : lilyIcon,
+      icon: Container(
+          child: CircleAvatar(
+              backgroundImage: AssetImage(getUserAvatarUrl(userRole))),
+          height:  30,
+          width: 30),
     );
   }
 
 }
 
-class CaptionCtrlButton extends StatelessWidget{
-
-  final CaptionEnum captionOptionVal;
-  const CaptionCtrlButton({required this.captionOptionVal, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final ValueNotifier captionValueNotifier = ConversationInheried.of(context).captionValueNotifier;
-    return InkWell(
-      child: DecoratedBox(
-        child: Padding(
-          child: Text(
-            captionOptions[captionOptionVal]!,
-            style:
-            TextStyle(color: Colors.grey[700], fontSize: 12),
-          ),
-          padding: EdgeInsets.all(3),
-        ),
-        decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(5)),
-      ),
-      onTap: () async {
-        CaptionEnum? captionOptionSelected = await showDialog(
-            context: context,
-            builder: (context) {
-              return SimpleDialog(
-                  title: const Text("选择如何提示"),
-                  children: captionOptions.keys.map((e) {
-                    return SimpleDialogOption(
-                      onPressed: () {
-                        Navigator.pop(context, e);
-                      },
-                      child: Text(captionOptions[e]!),
-                    );
-                  }).toList());
-            });
-        if (captionOptionSelected != null && captionOptionVal != captionOptionSelected) {
-          captionValueNotifier.value = captionOptionSelected;
-        }
-      },
-    );
-  }
-}
 
 class StatusDisplayWidget extends StatelessWidget{
   final ConversationStatus cStatus;
